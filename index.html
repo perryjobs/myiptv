@@ -205,6 +205,60 @@
             margin-top: 20px;
         }
 
+        .proxy-section {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .proxy-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .proxy-select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .proxy-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .proxy-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .proxy-status.enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .proxy-status.disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .proxy-info {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+
         .btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -250,6 +304,29 @@
             <a href="setup.html">⚙️ Manage Channels</a>
         </div>
         
+        <div class="proxy-section">
+            <div class="section-title">
+                🌐 CORS Proxy Settings
+            </div>
+            <div class="proxy-controls">
+                <label for="proxySelect">Proxy Server:</label>
+                <select id="proxySelect" class="proxy-select" onchange="updateProxySettings()">
+                    <option value="">🚫 No Proxy (Direct)</option>
+                    <option value="https://cors-anywhere.herokuapp.com/">🇺🇸 CORS Anywhere</option>
+                    <option value="https://api.allorigins.win/raw?url=">🌍 AllOrigins</option>
+                    <option value="https://corsproxy.io/?">🔒 CORSProxy.io</option>
+                    <option value="https://proxy.cors.sh/">⚡ CORS.sh</option>
+                    <option value="custom">⚙️ Custom Proxy</option>
+                </select>
+                <div class="proxy-status" id="proxyStatus">Disabled</div>
+            </div>
+            <input type="text" id="customProxy" placeholder="Enter custom proxy URL..." 
+                   style="width: 100%; margin-top: 10px; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; display: none;">
+            <div class="proxy-info">
+                CORS proxy helps bypass cross-origin restrictions and access geo-blocked streams
+            </div>
+        </div>
+
         <div class="player-section">
             <div class="current-channel">
                 <div class="channel-name" id="currentChannelName">Select a channel to start streaming</div>
@@ -294,6 +371,16 @@
         let channels = [];
         let currentChannel = null;
         let videoPlayer = document.getElementById('videoPlayer');
+        let proxyEnabled = false;
+        let proxyUrl = '';
+
+        // Available proxy servers
+        const proxyServers = {
+            'https://cors-anywhere.herokuapp.com/': 'CORS Anywhere (US)',
+            'https://api.allorigins.win/raw?url=': 'AllOrigins (Global)',
+            'https://corsproxy.io/?': 'CORSProxy.io (Secure)',
+            'https://proxy.cors.sh/': 'CORS.sh (Fast)'
+        };
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -308,44 +395,9 @@
         function loadSampleChannels() {
             // Sample channels - replace with your actual streams
             const sampleChannels = [
-                { name: "AMC NETWORK", url: "http://fl5.moveonjoy.com/AMC_NETWORK/index.m3u8" },
-                { name: "ANIMAL PLANET", url: "http://fl3.moveonjoy.com/Animal_Planet/index.m3u8" },
-                { name: "BBC AMERICA", url: "http://fl3.moveonjoy.com/BBC_AMERICA/index.m3u8" },
-                { name: "BET", url: "http://fl3.moveonjoy.com/BET_EAST/index.m3u8" },
-                { name: "BLOOMBERG", url: "http://fl3.moveonjoy.com/BLOOMBERG/index.m3u8" },
-                { name: "BOOMERANG", url: "http://fl3.moveonjoy.com/BOOMERANG/index.m3u8" },
-                { name: "BOUNCE TV", url: "http://fl3.moveonjoy.com/BOUNCE_TV/index.m3u8" },
-                { name: "BRAVO", url: "http://fl3.moveonjoy.com/BRAVO/index.m3u8" },
-                { name: "CARTOON NETWORK", url: "http://fl3.moveonjoy.com/CARTOON_NETWORK/index.m3u8" },
-                { name: "CINEMAX", url: "http://fl3.moveonjoy.com/CINEMAX/index.m3u8" },
-                { name: "COMEDY CENTRAL", url: "http://fl3.moveonjoy.com/Comedy_Central/index.m3u8" },
-                { name: "COOKING CHANNEL", url: "http://fl3.moveonjoy.com/COOKING_CHANNEL/index.m3u8" },
-                { name: "DISCOVERY CHANNEL", url: "http://fl3.moveonjoy.com/Discovery_Channel/index.m3u8" },
-                { name: "DISNEY XD", url: "http://fl3.moveonjoy.com/DISNEY_XD/index.m3u8" },
-                { name: "E! TV", url: "http://fl3.moveonjoy.com/E_ENTERTAINMENT_TELEVISION/index.m3u8" },
-                { name: "FOOD NETWORK", url: "http://fl3.moveonjoy.com/FOOD_NETWORK/index.m3u8" },
-                { name: "FREEFORM", url: "http://fl3.moveonjoy.com/FREE_FORM/index.m3u8" },
-                { name: "FX", url: "http://fl3.moveonjoy.com/FX/index.m3u8" },
-                { name: "FXX", url: "http://fl3.moveonjoy.com/FXX/index.m3u8" },
-                { name: "GAME SHOW", url: "http://fl5.moveonjoy.com/GAME_SHOW_NETWORK/index.m3u8" },
-                { name: "HALLMARK CHANNEL", url: "http://fl3.moveonjoy.com/HALLMARK_CHANNEL/index.m3u8" },
-                { name: "HBO", url: "http://fl3.moveonjoy.com/HBO/index.m3u8" },
-                { name: "HGTV", url: "http://fl3.moveonjoy.com/HGTV/index.m3u8" },
-                { name: "LIFETIME", url: "http://fl3.moveonjoy.com/LIFETIME/index.m3u8" },
-                { name: "MTV", url: "http://fl3.moveonjoy.com/MTV/index.m3u8" },
-                { name: "NICKELODEON", url: "http://fl1.moveonjoy.com/NICKELODEON/index.m3u8" },
-                { name: "NICKTOON", url: "http://fl1.moveonjoy.com/NICKTOONS/index.m3u8" },
-                { name: "PARAMOUNT", url: "http://fl3.moveonjoy.com/PARAMOUNT_NETWORK/index.m3u8" },
-                { name: "SHOWTIME", url: "http://fl3.moveonjoy.com/SHOWTIME/index.m3u8" },
-                { name: "STARZ", url: "http://fl3.moveonjoy.com/STARZ/index.m3u8" },
-                { name: "SYFY", url: "http://fl3.moveonjoy.com/SYFY/index.m3u8" },
-                { name: "TBS", url: "http://fl1.moveonjoy.com/TBS/index.m3u8" },
-                { name: "TNT", url: "http://fl3.moveonjoy.com/TNT/index.m3u8" },
-                { name: "TRU TV", url: "http://fl3.moveonjoy.com/TRU_TV/index.m3u8" },
-                { name: "TV LAND", url: "http://fl3.moveonjoy.com/TV_Land/index.m3u8" },
-                { name: "USA", url: "http://fl3.moveonjoy.com/USA_Network/index.m3u8" },
-                { name: "VH1", url: "http://fl3.moveonjoy.com/VH1/index.m3u8" },
-                { name: "THE WEATHER CHANNEL", url: "http://fl3.moveonjoy.com/THE_WEATHER_CHANNEL/index.m3u8" },
+                { name: "Big Buck Bunny", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },
+                { name: "Sintel Movie", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" },
+                { name: "Tears of Steel", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
             ];
             
             // Only load samples if no channels exist
@@ -550,8 +602,11 @@
                 showStatus('Detected HLS stream - may require HLS.js for full compatibility', 'success');
             }
             
-            // Load the stream
-            videoPlayer.src = currentChannel.url;
+            // Load the stream with proxy if enabled
+            const streamUrl = getProxiedUrl(currentChannel.url);
+            console.log('Loading stream:', streamUrl);
+            
+            videoPlayer.src = streamUrl;
             videoPlayer.load();
             
             // Enable controls
@@ -593,6 +648,100 @@
                 status.style.display = 'none';
             }, type === 'error' ? 10000 : 8000);
         }
+
+        // CORS Proxy Functions
+        function updateProxySettings() {
+            const select = document.getElementById('proxySelect');
+            const customInput = document.getElementById('customProxy');
+            const status = document.getElementById('proxyStatus');
+            
+            if (select.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.focus();
+                proxyEnabled = false;
+                proxyUrl = '';
+                status.textContent = 'Custom - Enter URL';
+                status.className = 'proxy-status disabled';
+            } else if (select.value === '') {
+                customInput.style.display = 'none';
+                proxyEnabled = false;
+                proxyUrl = '';
+                status.textContent = 'Disabled';
+                status.className = 'proxy-status disabled';
+            } else {
+                customInput.style.display = 'none';
+                proxyEnabled = true;
+                proxyUrl = select.value;
+                const serverName = proxyServers[select.value] || 'Unknown';
+                status.textContent = `Enabled - ${serverName}`;
+                status.className = 'proxy-status enabled';
+            }
+            
+            showStatus(`Proxy ${proxyEnabled ? 'enabled' : 'disabled'}. Reload channels to apply changes.`, 'success');
+        }
+
+        function setCustomProxy() {
+            const customInput = document.getElementById('customProxy');
+            const status = document.getElementById('proxyStatus');
+            const customUrl = customInput.value.trim();
+            
+            if (customUrl) {
+                proxyEnabled = true;
+                proxyUrl = customUrl.endsWith('/') ? customUrl : customUrl + '/';
+                status.textContent = 'Enabled - Custom';
+                status.className = 'proxy-status enabled';
+                showStatus('Custom proxy enabled. Reload channels to apply changes.', 'success');
+            } else {
+                proxyEnabled = false;
+                proxyUrl = '';
+                status.textContent = 'Disabled';
+                status.className = 'proxy-status disabled';
+                showStatus('Custom proxy disabled.', 'success');
+            }
+        }
+
+        function getProxiedUrl(originalUrl) {
+            if (!proxyEnabled || !proxyUrl) {
+                return originalUrl;
+            }
+            
+            // Some proxies need URL encoding
+            if (proxyUrl.includes('allorigins.win')) {
+                return proxyUrl + encodeURIComponent(originalUrl);
+            } else {
+                return proxyUrl + originalUrl;
+            }
+        }
+
+        function testProxyConnection(proxyUrl, callback) {
+            const testUrl = 'https://httpbin.org/ip';
+            const proxiedUrl = getProxiedUrl(testUrl);
+            
+            fetch(proxiedUrl)
+                .then(response => {
+                    if (response.ok) {
+                        callback(true, 'Proxy connection successful');
+                    } else {
+                        callback(false, `Proxy returned ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    callback(false, `Proxy connection failed: ${error.message}`);
+                });
+        }
+
+        // Add event listener for custom proxy input
+        document.addEventListener('DOMContentLoaded', function() {
+            const customInput = document.getElementById('customProxy');
+            if (customInput) {
+                customInput.addEventListener('blur', setCustomProxy);
+                customInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        setCustomProxy();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
