@@ -1,1 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Setup - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Taurus, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 300;
+            font-size: 2.2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .bulk-import {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .import-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .import-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .format-examples {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .format-examples h4 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 1.1em;
+        }
+
+        .format-examples .example {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .format-examples code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .channel-preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .channel-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .channel-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.9em;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .channel-url {
+            color: #6c757d;
+            font-family: monospace;
+            font-size: 0.8em;
+            word-break: break-all;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .file-upload {
+            background: white;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+        }
+
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .upload-label:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .import-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Channel Setup</h1>
+        <p class="subtitle">Import and manage your video channels</p>
+        
+        <div class="nav-links">
+            <a href="index.html">📺 Back to Player</a>
+            <a href="#bulk-import">📝 Bulk Import</a>
+            <a href="#file-upload">📁 File Upload</a>
+        </div>
+
+        <div class="file-upload" id="uploadArea">
+            <div class="section-title">
+                📁 Upload M3U Files
+            </div>
+            <label for="playlistFile" class="upload-label">
+                Choose M3U Files
+            </label>
+            <input type="file" id="playlistFile" accept=".m3u,.m3u8" multiple>
+            <p style="margin-top: 10px; color: #6c757d;">
+                Drag & drop M3U files here or click to browse
+            </p>
+        </div>
+
+        <div class="bulk-import" id="bulk-import">
+            <div class="section-title">
+                ⚡ Bulk Import Channels
+            </div>
+            
+            <div class="format-examples">
+                <h4>📋 Supported Formats:</h4>
+                
+                <div class="example">
+                    <strong>Simple Format:</strong> <code>Channel Name - Stream URL</code><br>
+                    <small>CNN - http://stream1.com/cnn<br>BBC - http://stream2.com/bbc</small>
+                </div>
+                
+                <div class="example">
+                    <strong>CSV Format:</strong> <code>Channel Name, Stream URL</code><br>
+                    <small>CNN, http://stream1.com/cnn<br>BBC, http://stream2.com/bbc</small>
+                </div>
+                
+                <div class="example">
+                    <strong>M3U Format:</strong><br>
+                    <small>#EXTINF:-1,CNN<br>http://stream1.com/cnn<br>#EXTINF:-1,BBC<br>http://stream2.com/bbc</small>
+                </div>
+                
+                <div class="example">
+                    <strong>URL Only:</strong> <code>Just paste URLs (auto-named)</code><br>
+                    <small>http://stream1.com/cnn<br>http://stream2.com/bbc</small>
+                </div>
+            </div>
+            
+            <textarea id="bulkImportText" class="import-textarea" placeholder="Paste your channels here in any of the supported formats above...
+
+Example:
+CNN - http://stream1.com/cnn
+BBC News - http://stream2.com/bbc
+ESPN - http://stream3.com/espn
+Discovery - http://stream4.com/discovery
+National Geographic - http://stream5.com/natgeo
+
+...paste all 30 of your channels here..."></textarea>
+            
+            <div class="import-actions">
+                <button class="btn" onclick="processBulkImport()">📥 Import Channels</button>
+                <button class="btn secondary" onclick="clearBulkImport()">🗑️ Clear Text</button>
+                <button class="btn secondary" onclick="previewChannels()">👁️ Preview</button>
+            </div>
+        </div>
+
+        <div class="channel-preview" id="channelPreview" style="display: none;">
+            <div class="section-title">
+                👁️ Channel Preview
+            </div>
+            <div class="channel-list" id="previewList">
+                <!-- Preview channels will appear here -->
+            </div>
+        </div>
+
+        <div class="bulk-import">
+            <div class="section-title">
+                💾 Export & Save
+            </div>
+            <p style="margin-bottom: 15px; color: #666;">
+                After importing your channels, export them to an M3U file for use with the main player.
+            </p>
+            <div class="import-actions">
+                <button class="btn success" onclick="exportChannels()" id="exportBtn" disabled>📤 Export M3U File</button>
+                <button class="btn secondary" onclick="clearAllChannels()">🗑️ Clear All Channels</button>
+            </div>
+            <p id="channelCount" style="text-align: center; margin-top: 10px; color: #666;">
+                0 channels loaded
+            </p>
+        </div>
+
+        <div class="status" id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let channels = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            setupDragDrop();
+            updateChannelCount();
+        });
+
+        function setupFileUpload() {
+            document.getElementById('playlistFile').addEventListener('change', handleFileSelect);
+        }
+
+        function setupDragDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = Array.from(e.dataTransfer.files).filter(file => 
+                    file.name.toLowerCase().endsWith('.m3u') || file.name.toLowerCase().endsWith('.m3u8')
+                );
+                
+                if (files.length > 0) {
+                    processFiles(files);
+                } else {
+                    showStatus("Please drop M3U or M3U8 files only.", "error");
+                }
+            });
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            let processedCount = 0;
+            let newChannelsCount = 0;
+            
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const newChannels = parseM3U(content, file.name);
+                    
+                    // Add new channels, avoiding duplicates
+                    newChannels.forEach(channel => {
+                        if (!channels.some(existing => existing.url === channel.url)) {
+                            channels.push(channel);
+                            newChannelsCount++;
+                        }
+                    });
+                    
+                    processedCount++;
+                    if (processedCount === files.length) {
+                        updateChannelCount();
+                        showStatus(`Processed ${files.length} file(s), added ${newChannelsCount} new channel(s)`, "success");
+                    }
+                };
+                reader.onerror = function() {
+                    showStatus(`Error reading file: ${file.name}`, "error");
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        function parseM3U(content, filename) {
+            const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+            const parsedChannels = [];
+            let currentName = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                if (line.startsWith('#EXTINF:')) {
+                    const nameMatch = line.match(/,(.+)$/);
+                    currentName = nameMatch ? nameMatch[1].trim() : null;
+                } else if (line.startsWith('http://') || line.startsWith('https://')) {
+                    const channelName = currentName || `Channel from ${filename}`;
+                    parsedChannels.push({
+                        name: channelName,
+                        url: line,
+                        source: filename
+                    });
+                    currentName = null;
+                }
+            }
+            
+            return parsedChannels;
+        }
+
+        function processBulkImport() {
+            const text = document.getElementById('bulkImportText').value.trim();
+            if (!text) {
+                showStatus('Please paste your channel data first', 'error');
+                return;
+            }
+
+            const newChannels = parseBulkImportText(text);
+            if (newChannels.length === 0) {
+                showStatus('No valid channels found. Please check the format.', 'error');
+                return;
+            }
+
+            // Add new channels, avoiding duplicates
+            let addedCount = 0;
+            newChannels.forEach(channel => {
+                if (!channels.some(existing => existing.url === channel.url)) {
+                    channels.push(channel);
+                    addedCount++;
+                }
+            });
+
+            updateChannelCount();
+            showStatus(`Successfully imported ${addedCount} new channels! (${newChannels.length - addedCount} duplicates skipped)`, 'success');
+            
+            document.getElementById('bulkImportText').value = '';
+        }
+
+        function parseBulkImportText(text) {
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#EXTM3U'));
+            const newChannels = [];
+            let channelCounter = channels.length + 1;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                if (line.startsWith('#EXTINF:')) {
+                    const nameMatch = line.match(/,(.+)$/);
+                    const channelName = nameMatch ? nameMatch[1].trim() : `Channel ${channelCounter}`;
+                    
+                    if (i + 1 < lines.length) {
+                        const url = lines[i + 1].trim();
+                        if (isValidUrl(url)) {
+                            newChannels.push({
+                                name: channelName,
+                                url: url,
+                                source: 'Bulk Import'
+                            });
+                            i++;
+                            channelCounter++;
+                        }
+                    }
+                }
+                else if (line.includes(' - http')) {
+                    const parts = line.split(' - ');
+                    if (parts.length >= 2) {
+                        const name = parts[0].trim();
+                        const url = parts.slice(1).join(' - ').trim();
+                        if (isValidUrl(url)) {
+                            newChannels.push({
+                                name: name || `Channel ${channelCounter}`,
+                                url: url,
+                                source: 'Bulk Import'
+                            });
+                            channelCounter++;
+                        }
+                    }
+                }
+                else if (line.includes(',') && line.includes('http')) {
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const name = parts[0].trim();
+                        const url = parts.slice(1).join(',').trim();
+                        if (isValidUrl(url)) {
+                            newChannels.push({
+                                name: name || `Channel ${channelCounter}`,
+                                url: url,
+                                source: 'Bulk Import'
+                            });
+                            channelCounter++;
+                        }
+                    }
+                }
+                else if (isValidUrl(line)) {
+                    newChannels.push({
+                        name: `Channel ${channelCounter}`,
+                        url: line,
+                        source: 'Bulk Import'
+                    });
+                    channelCounter++;
+                }
+            }
+
+            return newChannels;
+        }
+
+        function isValidUrl(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function previewChannels() {
+            const text = document.getElementById('bulkImportText').value.trim();
+            if (!text) {
+                showStatus('Please paste your channel data first', 'error');
+                return;
+            }
+
+            const previewChannels = parseBulkImportText(text);
+            if (previewChannels.length === 0) {
+                showStatus('No valid channels found to preview', 'error');
+                return;
+            }
+
+            const previewList = document.getElementById('previewList');
+            previewList.innerHTML = '';
+
+            previewChannels.forEach(channel => {
+                const item = document.createElement('div');
+                item.className = 'channel-item';
+                item.innerHTML = `
+                    <div class="channel-name">${channel.name}</div>
+                    <div class="channel-url">${channel.url}</div>
+                `;
+                previewList.appendChild(item);
+            });
+
+            document.getElementById('channelPreview').style.display = 'block';
+            showStatus(`Preview: ${previewChannels.length} channels found`, 'success');
+        }
+
+        function clearBulkImport() {
+            document.getElementById('bulkImportText').value = '';
+            document.getElementById('channelPreview').style.display = 'none';
+            showStatus('Text area cleared', 'success');
+        }
+
+        function exportChannels() {
+            if (channels.length === 0) {
+                showStatus('No channels to export', 'error');
+                return;
+            }
+
+            let m3uContent = '#EXTM3U\n';
+            channels.forEach(channel => {
+                m3uContent += `#EXTINF:-1,${channel.name}\n${channel.url}\n`;
+            });
+
+            const blob = new Blob([m3uContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'channels.m3u';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showStatus(`Exported ${channels.length} channels to channels.m3u`, 'success');
+        }
+
+        function clearAllChannels() {
+            if (confirm('Are you sure you want to clear all channels?')) {
+                channels = [];
+                updateChannelCount();
+                document.getElementById('channelPreview').style.display = 'none';
+                showStatus('All channels cleared', 'success');
+            }
+        }
+
+        function updateChannelCount() {
+            const count = channels.length;
+            document.getElementById('channelCount').textContent = `${count} channels loaded`;
+            document.getElementById('exportBtn').disabled = count === 0;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, type === 'error' ? 8000 : 5000);
+        }
+    </script>
+</body>
+</html>
